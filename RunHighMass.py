@@ -9,8 +9,8 @@ import json
 
 sys.path.append('../inputs/')
 
-from higgs_xsbr_13TeV import *
-from createXSworkspace import createXSworkspace
+from higgs_highmass_br_13TeV import *
+from createWorkspace import createWorkspace
 from createDatacard import createDatacard
 
 
@@ -103,11 +103,11 @@ def produceDatacards(obsName, observableBins, ModelName, physicalmodel):
         for fState in fStates:
             if (not obsName.startswith("mass4l")):
                 for obsBin in range(nBins):
-                    ndata = createXSworkspace(obsName,fState, nBins, obsBin, observableBins, False, True, ModelName, physicalmodel, year, JES, doubleDiff, opt.LOWER_BOUND, opt.UPPER_BOUND, opt.OBSNAME)
+                    ndata = createWorkspace(obsName,fState, nBins, obsBin, observableBins, False, True, ModelName, physicalmodel, year, JES, doubleDiff, opt.LOWER_BOUND, opt.UPPER_BOUND, opt.OBSNAME)
                     createDatacard(obsName, fState, nBins, obsBin, observableBins, physicalmodel, year, ndata, JES, opt.LOWER_BOUND, opt.UPPER_BOUND, opt.YEAR)
                     os.chdir('../datacard/datacard_'+year)
             else:
-                ndata = createXSworkspace(obsName,fState, nBins, 0, observableBins, False, True, ModelName, physicalmodel, year, JES, doubleDiff, opt.LOWER_BOUND, opt.UPPER_BOUND, opt.OBSNAME)
+                ndata = createWorkspace(obsName,fState, nBins, 0, observableBins, False, True, ModelName, physicalmodel, year, JES, doubleDiff, opt.LOWER_BOUND, opt.UPPER_BOUND, opt.OBSNAME)
                 createDatacard(obsName, fState, nBins, 0, observableBins, physicalmodel, year, ndata, JES, opt.LOWER_BOUND, opt.UPPER_BOUND, opt.YEAR)
                 os.chdir('../datacard/datacard_'+year)
 
@@ -117,7 +117,7 @@ def produceDatacards(obsName, observableBins, ModelName, physicalmodel):
                 # os.system("sed -i 's~_xs.Databin0~_xs_"+ModelName+"_"+obsName+"_"+PhysicalModel+".Databin0~g' xs_125.0/hzz4l_"+fState+"S_13TeV_xs_"+obsName+"_bin0_"+PhysicalModel+".txt")
 
 
-def runFiducialXS():
+def runHighMass():
     # variable for double-differential measurements and obsName
     # global doubleDiff
     # if 'vs' in opt.OBSNAME:
@@ -131,7 +131,7 @@ def runFiducialXS():
     # prepare the set of bin boundaries to run over, it is retrieved from inputs file
     _temp = __import__('inputs_sig_'+obsName+'_'+opt.YEAR, globals(), locals(), ['observableBins'], -1)
     observableBins = _temp.observableBins
-    print 'Running Fiducial XS computation - '+obsName+' - bin boundaries: ', observableBins, '\n'
+    print 'Running High mass computation - '+obsName+' - bin boundaries: ', observableBins, '\n'
     print 'Theory xsec and BR at MH = '+_th_MH
     print 'Current directory: python'
 
@@ -154,8 +154,8 @@ def runFiducialXS():
             print 'addConstrainedModel '+year+' already done'
     if 'Full' in years: years.remove('Full')
     # "__import__" to SetParameters when running the expected measurement
-    _temp = __import__('higgs_xsbr_13TeV', globals(), locals(), ['higgs_xs','higgs4l_br'], -1)
-    higgs_xs = _temp.higgs_xs
+    _temp = __import__('higgs_highmass_br_13TeV', globals(), locals(), ['higgs_highmass','higgs4l_br'], -1)
+    higgs_highmass = _temp.higgs_highmass
     higgs4l_br = _temp.higgs4l_br
     _temp = __import__('inputs_sig_'+obsName+'_'+opt.YEAR, globals(), locals(), ['acc'], -1)
     acc = _temp.acc
@@ -185,8 +185,8 @@ def runFiducialXS():
                 if(nBins>0):
                     cmd = 'combineCards.py '
                     for obsBin in range(nBins):
-                        cmd = cmd + 'hzz4l_'+fState+'S_13TeV_xs_'+obsName+'_bin'+str(obsBin)+'_'+physicalModel+'.txt '
-                    cmd = cmd + '> hzz4l_'+fState+'S_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt'
+                        cmd = cmd + 'hzz4l_'+fState+'S_13TeV_highmass_'+obsName+'_bin'+str(obsBin)+'_'+physicalModel+'.txt '
+                    cmd = cmd + '> hzz4l_'+fState+'S_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt'
                     print cmd, '\n'
                     processCmd(cmd,1)
                     cmds.append(cmd)
@@ -194,7 +194,7 @@ def runFiducialXS():
                     print 'There is a problem during the combination over bins'
 
             # combine 3 final states
-            cmd = 'combineCards.py hzz4l_4muS_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt hzz4l_4eS_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt hzz4l_2e2muS_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt > hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt'
+            cmd = 'combineCards.py hzz4l_4muS_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt hzz4l_4eS_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt hzz4l_2e2muS_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt > hzz4l_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt'
             print cmd, '\n'
             processCmd(cmd,1)
             cmds.append(cmd)
@@ -206,7 +206,7 @@ def runFiducialXS():
         os.chdir('../datacard/')
         print 'Current directory: datacard'
         if (opt.YEAR == 'Full'):
-            cmd = 'combineCards.py datacard_2016/hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt datacard_2017/hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt datacard_2018/hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt > hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt'
+            cmd = 'combineCards.py datacard_2016/hzz4l_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt datacard_2017/hzz4l_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt datacard_2018/hzz4l_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt > hzz4l_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt'
             print cmd, '\n'
             processCmd(cmd,1)
             cmds.append(cmd)
@@ -216,16 +216,16 @@ def runFiducialXS():
                 cmd = 'echo "nuis group = CMS_eff_e CMS_eff_m CMS_hzz2e2mu_Zjets_2016 CMS_hzz2e2mu_Zjets_2017 CMS_hzz2e2mu_Zjets_2018 CMS_hzz4e_Zjets_2016 CMS_hzz4e_Zjets_2017 CMS_hzz4e_Zjets_2018 CMS_hzz4mu_Zjets_2016 CMS_hzz4mu_Zjets_2017 CMS_hzz4mu_Zjets_2018 QCDscale_VV QCDscale_ggVV kfactor_ggzz lumi_13TeV_2016_uncorrelated lumi_13TeV_2017_uncorrelated lumi_13TeV_2018_uncorrelated lumi_13TeV_correlated_16_17_18 lumi_13TeV_correlated_17_18 norm_fakeH pdf_gg pdf_qqbar CMS_zz4l_sigma_e_sig_2017 CMS_zz4l_sigma_e_sig_2016 CMS_zz4l_sigma_m_sig_2018 CMS_zz4l_sigma_m_sig_2017 CMS_zz4l_sigma_m_sig_2016 CMS_zz4l_n_sig_3_2016 CMS_zz4l_n_sig_3_2017 CMS_zz4l_mean_e_sig_2016 CMS_zz4l_mean_e_sig_2017 CMS_zz4l_n_sig_3_2018 CMS_zz4l_mean_m_sig_2018 CMS_zz4l_mean_m_sig_2016 CMS_zz4l_mean_m_sig_2017 CMS_zz4l_sigma_e_sig_2018 CMS_zz4l_mean_e_sig_2018'
             if JES:
                 cmd += ' CMS_scale_j_Abs CMS_scale_j_Abs_2016 CMS_scale_j_BBEC1 CMS_scale_j_BBEC1_2016 CMS_scale_j_EC2 CMS_scale_j_EC2_2016 CMS_scale_j_FlavQCD CMS_scale_j_HF CMS_scale_j_HF_2016 CMS_scale_j_RelBal CMS_scale_j_RelSample_2016 CMS_scale_j_Abs CMS_scale_j_Abs_2017 CMS_scale_j_BBEC1 CMS_scale_j_BBEC1_2017 CMS_scale_j_EC2 CMS_scale_j_EC2_2017 CMS_scale_j_FlavQCD CMS_scale_j_HF CMS_scale_j_HF_2017 CMS_scale_j_RelBal CMS_scale_j_RelSample_2017 CMS_scale_j_Abs CMS_scale_j_Abs_2018 CMS_scale_j_BBEC1 CMS_scale_j_BBEC1_2018 CMS_scale_j_EC2 CMS_scale_j_EC2_2018 CMS_scale_j_FlavQCD CMS_scale_j_HF CMS_scale_j_HF_2018 CMS_scale_j_RelBal CMS_scale_j_RelSample_2018 CMS_scale_j_ZX'
-            cmd += '" >> hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt'
+            cmd += '" >> hzz4l_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt'
             print cmd, '\n'
             processCmd(cmd,1)
             cmds.append(cmd)
         else:
-            cmd = 'cp datacard_'+str(opt.YEAR)+'/hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt'
+            cmd = 'cp datacard_'+str(opt.YEAR)+'/hzz4l_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt hzz4l_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt'
             print cmd, '\n'
             processCmd(cmd,1)
             cmds.append(cmd)
-            cmd = "sed -i 's|hzz4l|datacard_"+str(opt.YEAR)+"/hzz4l|g' hzz4l_all_13TeV_xs_"+obsName+"_bin_"+physicalModel+".txt" # Specify the right pattern to datacards (Before it was not necessary because there was a further combination)
+            cmd = "sed -i 's|hzz4l|datacard_"+str(opt.YEAR)+"/hzz4l|g' hzz4l_all_13TeV_highmass_"+obsName+"_bin_"+physicalModel+".txt" # Specify the right pattern to datacards (Before it was not necessary because there was a further combination)
             print cmd, '\n'
             processCmd(cmd,1)
             cmds.append(cmd)
@@ -235,31 +235,31 @@ def runFiducialXS():
                 cmd = 'echo "nuis group = CMS_eff_e CMS_eff_m CMS_hzz2e2mu_Zjets_'+str(opt.YEAR)+' CMS_hzz4e_Zjets_'+str(opt.YEAR)+' CMS_hzz4mu_Zjets_'+str(opt.YEAR)+' QCDscale_VV QCDscale_ggVV kfactor_ggzz lumi_13TeV_'+str(opt.YEAR)+' norm_fakeH pdf_gg pdf_qqbar CMS_zz4l_sigma_e_sig_'+str(opt.YEAR)+' CMS_zz4l_sigma_m_sig_'+str(opt.YEAR)+' CMS_zz4l_n_sig_3_'+str(opt.YEAR)+' CMS_zz4l_mean_e_sig_'+str(opt.YEAR)+' CMS_zz4l_mean_m_sig_'+str(opt.YEAR)+' CMS_zz4l_sigma_e_sig_'+str(opt.YEAR)
             if JES:
                 cmd += ' CMS_scale_j_Abs CMS_scale_j_Abs_'+str(opt.YEAR)+' CMS_scale_j_BBEC1 CMS_scale_j_BBEC1_'+str(opt.YEAR)+' CMS_scale_j_EC2 CMS_scale_j_EC2_'+str(opt.YEAR)+' CMS_scale_j_FlavQCD CMS_scale_j_HF CMS_scale_j_HF_'+str(opt.YEAR)+' CMS_scale_j_RelBal CMS_scale_j_RelSample_'+str(opt.YEAR)+' CMS_scale_j_ZX'
-            cmd += '" >> hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt'
+            cmd += '" >> hzz4l_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt'
             processCmd(cmd,1)
             cmds.append(cmd)
             print cmd, '\n'
 
         # text-to-workspace
         if (physicalModel=="v3"):
-            cmd = 'text2workspace.py hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt -P HiggsAnalysis.CombinedLimit.HZZ4L_Fiducial:differentialFiducialV3 --PO higgsMassRange=115,135 --PO nBin='+str(nBins)+' -o hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.root'
+            cmd = 'text2workspace.py hzz4l_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt -P HiggsAnalysis.CombinedLimit.HZZ4L_Fiducial:differentialFiducialV3 --PO higgsMassRange=115,135 --PO nBin='+str(nBins)+' -o hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.root'
             print cmd, '\n'
             processCmd(cmd)
             cmds.append(cmd)
         elif (physicalModel=="v4"):
-            cmd = 'text2workspace.py hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt -P HiggsAnalysis.CombinedLimit.HZZ4L_Fiducial_v2:differentialFiducialV4 --PO higgsMassRange=115,135 --PO nBin='+str(nBins)+' -o hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.root'
+            cmd = 'text2workspace.py hzz4l_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt -P HiggsAnalysis.CombinedLimit.HZZ4L_Fiducial_v2:differentialFiducialV4 --PO higgsMassRange=115,135 --PO nBin='+str(nBins)+' -o hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.root'
             print cmd, '\n'
             processCmd(cmd)
             cmds.append(cmd)
         elif (physicalModel=="v2"):
-            cmd = 'text2workspace.py hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.txt -P HiggsAnalysis.CombinedLimit.HZZ4L_Fiducial_v2:differentialFiducialV2 --PO higgsMassRange=115,135 --PO nBin='+str(nBins)+' -o hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.root'
+            cmd = 'text2workspace.py hzz4l_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.txt -P HiggsAnalysis.CombinedLimit.HZZ4L_Fiducial_v2:differentialFiducialV2 --PO higgsMassRange=115,135 --PO nBin='+str(nBins)+' -o hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.root'
             print cmd, '\n'
             processCmd(cmd)
             cmds.append(cmd)
 
 
         # The workspace got from text2workspace changes name from hzz4l_ to SM_125 and it is transferred to the combine_files directory
-        cmd = 'cp hzz4l_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.root ../combine_files/'+DataModelName+'_all_13TeV_xs_'+obsName+'_bin_'+physicalModel+'.root'
+        cmd = 'cp hzz4l_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.root ../combine_files/'+DataModelName+'_all_13TeV_highmass_'+obsName+'_bin_'+physicalModel+'.root'
         print cmd, '\n'
         processCmd(cmd,1)
         cmds.append(cmd)
@@ -270,14 +270,11 @@ def runFiducialXS():
         # nBins = len(observableBins)
         if physicalModel == 'v2': # In this case implemented for mass4l only
             for channel in ['4e', '4mu', '2e2mu']:
-                cmd = 'combine -n _'+obsName+'_r'+channel+'Bin0 -M MultiDimFit SM_125_all_13TeV_xs_'+obsName+'_bin_v2.root -m 125.38 --freezeParameters MH -P r'+channel+'Bin0 --floatOtherPOIs=1 --saveWorkspace --setParameterRanges r'+channel+'Bin0=0.0,2.5 --redefineSignalPOI r'+channel+'Bin0 --algo=grid --points=100 --cminDefaultMinimizerStrategy 0 --saveInactivePOI=1'
+                cmd = 'combine -n _'+obsName+'_r'+channel+'Bin0 -M MultiDimFit SM_125_all_13TeV_highmass_'+obsName+'_bin_v2.root -m 125.38 --freezeParameters MH -P r'+channel+'Bin0 --floatOtherPOIs=1 --saveWorkspace --setParameterRanges r'+channel+'Bin0=0.0,2.5 --redefineSignalPOI r'+channel+'Bin0 --algo=grid --points=100 --cminDefaultMinimizerStrategy 0 --saveInactivePOI=1'
 
-                fidxs = 0
-                fidxs = higgs_xs['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ggH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['VBFH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['WH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['WH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['ZH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ZH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['ttH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ttH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                fid_highmass = 0
+                fid_highmass = higgs_highmass['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ggH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                fid_highmass += higgs_highmass['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['VBFH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
                 if(not opt.UNBLIND): cmd = cmd + ' -t -1 --saveToys --setParameters r'+channel+'Bin0='+str(round(fidxs,4))
                 print cmd, '\n'
                 output = processCmd(cmd)
@@ -298,14 +295,12 @@ def runFiducialXS():
         if physicalModel == 'v4':
             for obsBin in range(nBins):
                 # ----- 2e2mu -----
-                cmd = 'combine -n _'+obsName+'_r2e2muBin'+str(obsBin)+' -M MultiDimFit SM_125_all_13TeV_xs_'+obsName+'_bin_v4.root -m 125.38 --freezeParameters MH -P r2e2muBin'+str(obsBin)+' --floatOtherPOIs=1 --saveWorkspace --setParameterRanges r2e2muBin'+str(obsBin)+'=0.0,2.5 --redefineSignalPOI r2e2muBin'+str(obsBin)+' --algo=grid --points=100 --cminDefaultMinimizerStrategy 0 --saveInactivePOI=1'
+                cmd = 'combine -n _'+obsName+'_r2e2muBin'+str(obsBin)+' -M MultiDimFit SM_125_all_13TeV_highmass_'+obsName+'_bin_v4.root -m 125.38 --freezeParameters MH -P r2e2muBin'+str(obsBin)+' --floatOtherPOIs=1 --saveWorkspace --setParameterRanges r2e2muBin'+str(obsBin)+'=0.0,2.5 --redefineSignalPOI r2e2muBin'+str(obsBin)+' --algo=grid --points=100 --cminDefaultMinimizerStrategy 0 --saveInactivePOI=1'
 
-                fidxs = 0
-                fidxs = higgs_xs['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_2e2mu']*acc['ggH125_2e2mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_2e2mu']*acc['VBFH125_2e2mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['WH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_2e2mu']*acc['WH125_2e2mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['ZH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_2e2mu']*acc['ZH125_2e2mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['ttH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_2e2mu']*acc['ttH125_2e2mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                fid_highmass = 0
+                fid_highmass = higgs_highmass['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_2e2mu']*acc['ggH125_2e2mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                fid_highmass += higgs_highmass['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_2e2mu']*acc['VBFH125_2e2mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+
                 if(not opt.UNBLIND): cmd = cmd + ' -t -1 --saveToys --setParameters r2e2muBin'+str(obsBin)+'='+str(round(fidxs,4))
                 print cmd, '\n'
                 output = processCmd(cmd)
@@ -324,22 +319,16 @@ def runFiducialXS():
                 cmds.append(cmd)
 
                 # ----- 4e+4mu = 4l -----
-                cmd = 'combine -n _'+obsName+'_r4lBin'+str(obsBin)+' -M MultiDimFit SM_125_all_13TeV_xs_'+obsName+'_bin_v4.root -m 125.38 --freezeParameters MH -P r4lBin'+str(obsBin)+' --floatOtherPOIs=1 --saveWorkspace --setParameterRanges r4lBin'+str(obsBin)+'=0.0,2.5 --redefineSignalPOI r4lBin'+str(obsBin)+' --algo=grid --points=100 --cminDefaultMinimizerStrategy 0'
+                cmd = 'combine -n _'+obsName+'_r4lBin'+str(obsBin)+' -M MultiDimFit SM_125_all_13TeV_highmass_'+obsName+'_bin_v4.root -m 125.38 --freezeParameters MH -P r4lBin'+str(obsBin)+' --floatOtherPOIs=1 --saveWorkspace --setParameterRanges r4lBin'+str(obsBin)+'=0.0,2.5 --redefineSignalPOI r4lBin'+str(obsBin)+' --algo=grid --points=100 --cminDefaultMinimizerStrategy 0'
 
-                fidxs = 0
+                fid_highmass = 0
                 # 4e
-                fidxs = higgs_xs['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4e']*acc['ggH125_4e_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4e']*acc['VBFH125_4e_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['WH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4e']*acc['WH125_4e_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['ZH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4e']*acc['ZH125_4e_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['ttH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4e']*acc['ttH125_4e_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                fid_highmass = higgs_highmass['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4e']*acc['ggH125_4e_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                fid_highmass += higgs_highmass['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4e']*acc['VBFH125_4e_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
                 # 4mu
-                fidxs += higgs_xs['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4mu']*acc['ggH125_4mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4mu']*acc['VBFH125_4mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['WH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4mu']*acc['WH125_4mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['ZH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4mu']*acc['ZH125_4mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                fidxs += higgs_xs['ttH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4mu']*acc['ttH125_4mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                if(not opt.UNBLIND): cmd = cmd + ' -t -1 --saveToys --setParameters r4lBin'+str(obsBin)+'='+str(round(fidxs,4))
+                fid_highmass += higgs_highmass['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4mu']*acc['ggH125_4mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                fid_highmass += higgs_highmass['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_4mu']*acc['VBFH125_4mu_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                if(not opt.UNBLIND): cmd = cmd + ' -t -1 --saveToys --setParameters r4lBin'+str(obsBin)+'='+str(round(fid_highmass,4))
                 print cmd, '\n'
                 output = processCmd(cmd)
                 cmds.append(cmd)
@@ -359,42 +348,35 @@ def runFiducialXS():
 
         elif physicalModel == 'v3':
             XH = []
-            tmp_xs = {}
-            tmp_xs_sm = {}
+            tmp_highmass = {}
+            tmp_highmass_sm = {}
             for channel in ['4e','4mu','2e2mu']:
                 for obsBin in range(nBins):
-                    fidxs_sm = 0
-                    fidxs_sm += higgs_xs['ggH_'+'125.0']*higgs4l_br['125.0'+'_'+channel]*acc['ggH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    fidxs_sm += higgs_xs['VBF_'+'125.0']*higgs4l_br['125.0'+'_'+channel]*acc['VBFH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    fidxs_sm += higgs_xs['WH_'+'125.0']*higgs4l_br['125.0'+'_'+channel]*acc['WH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    fidxs_sm += higgs_xs['ZH_'+'125.0']*higgs4l_br['125.0'+'_'+channel]*acc['ZH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    fidxs_sm += higgs_xs['ttH_'+'125.0']*higgs4l_br['125.0'+'_'+channel]*acc['ttH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-
-                    fidxs = 0
-
-                    fidxs += higgs_xs['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ggH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    fidxs += higgs_xs['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['VBFH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    fidxs += higgs_xs['WH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['WH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    fidxs += higgs_xs['ZH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ZH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    fidxs += higgs_xs['ttH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ttH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-
+                    fid_highmasss_sm = 0
+                    fid_highmass_sm += higgs_highmass['ggH_'+'125.0']*higgs4l_br['125.0'+'_'+channel]*acc['ggH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                    fid_highmass_sm += higgs_highmass['VBF_'+'125.0']*higgs4l_br['125.0'+'_'+channel]*acc['VBFH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                    
+                    fid_highmass = 0
+                    fid_highmasss += higgs_highmass['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ggH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                    fid_highmass += higgs_highmass['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['VBFH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                   
                     # fidxs = fidxs_sm
 
-                    tmp_xs_sm[channel+'_genbin'+str(obsBin)] = fidxs_sm
-                    tmp_xs[channel+'_genbin'+str(obsBin)] = fidxs
+                    tmp_highmass_sm[channel+'_genbin'+str(obsBin)] = fid_highmass_sm
+                    tmp_highmass[channel+'_genbin'+str(obsBin)] = fid_highmass
 
             cmd_BR = ""
             for obsBin in range(nBins):
-                fidxs4e = tmp_xs['4e_genbin'+str(obsBin)]
-                fidxs4mu = tmp_xs['4mu_genbin'+str(obsBin)]
-                fidxs2e2mu = tmp_xs['2e2mu_genbin'+str(obsBin)]
-                frac4e = fidxs4e/(fidxs4e+fidxs4mu+fidxs2e2mu)
-                frac4mu = fidxs4mu/(fidxs4e+fidxs4mu+fidxs2e2mu)
-                fidxs4e_sm = tmp_xs_sm['4e_genbin'+str(obsBin)]
-                fidxs4mu_sm = tmp_xs_sm['4mu_genbin'+str(obsBin)]
-                fidxs2e2mu_sm = tmp_xs_sm['2e2mu_genbin'+str(obsBin)]
-                frac4e_sm = fidxs4e_sm/(fidxs4e_sm+fidxs4mu_sm+fidxs2e2mu_sm)
-                frac4mu_sm = fidxs4mu_sm/(fidxs4e_sm+fidxs4mu_sm+fidxs2e2mu_sm)
+                fid_highmass_4e = tmp_highmass['4e_genbin'+str(obsBin)]
+                fid_highmass_4mu = tmp_highmass['4mu_genbin'+str(obsBin)]
+                fid_highmass_2e2mu = tmp_highmass['2e2mu_genbin'+str(obsBin)]
+                frac4e = fid_highmass_4e/(fid_highmass_4e+fid_highmass_4mu+fid_highmass_2e2mu)
+                frac4mu = fid_highmass_4mu/(fid_highmass_4e+fid_highmass_4mu+fid_highmass_2e2mu)
+                fid_highmass_4e_sm = tmp_highmass_sm['4e_genbin'+str(obsBin)]
+                fid_highmass_4mu_sm = tmp_highmass_sm['4mu_genbin'+str(obsBin)]
+                fid_highmass_2e2mu_sm = tmp_highmass_sm['2e2mu_genbin'+str(obsBin)]
+                frac4e_sm = fid_highmass_4e_sm/(fid_highmass_4e_sm+fid_highmass_4mu_sm+fid_highmass_2e2mu_sm)
+                frac4mu_sm = fid_highmass_4mu_sm/(fid_highmass_4e_sm+fid_highmass_4mu_sm+fid_highmass_2e2mu_sm)
                 K1 = frac4e/frac4e_sm
                 K2 = frac4mu/frac4mu_sm * (1.0-frac4e_sm)/(1.0-frac4e)
 
@@ -405,11 +387,8 @@ def runFiducialXS():
             for obsBin in range(nBins):
                 XH.append(0.0)
                 for channel in ['4e','4mu','2e2mu']:
-                    XH_fs = higgs_xs['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ggH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    XH_fs += higgs_xs['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['VBFH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    XH_fs += higgs_xs['WH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['WH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    XH_fs += higgs_xs['ZH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ZH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    XH_fs += higgs_xs['ttH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ttH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                    XH_fs = higgs_highmass['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ggH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                    XH_fs += higgs_highmass['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['VBFH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
                     XH[obsBin]+=XH_fs
 
                 _obsxsec = XH[obsBin]
@@ -433,11 +412,8 @@ def runFiducialXS():
             for obsBin in range(nBins):
                 XH.append(0.0)
                 for channel in ['4e','4mu','2e2mu']:
-                    XH_fs = higgs_xs['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ggH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    XH_fs += higgs_xs['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['VBFH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    XH_fs += higgs_xs['WH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['WH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    XH_fs += higgs_xs['ZH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ZH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
-                    XH_fs += higgs_xs['ttH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ttH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                    XH_fs = higgs_highmass['ggH_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['ggH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
+                    XH_fs += higgs_highmass['VBF_'+opt.THEORYMASS]*higgs4l_br[opt.THEORYMASS+'_'+channel]*acc['VBFH125_'+channel+'_'+obsName+'_genbin'+str(obsBin)+'_recobin'+str(obsBin)]
                     XH[obsBin]+=XH_fs
                 _obsxsec = XH[obsBin]
                 cmd = 'combine -n _'+obsName+'_SigmaBin'+str(obsBin)+'_NoSys'
@@ -472,7 +448,7 @@ if (('pTj1' in obsName) | ('pTHj' in obsName) | ('mHj' in obsName) | ('pTj2' in 
     JES = True
 else:
     JES = False
-runFiducialXS()
+runFiducialHighMass()
 os.chdir(_fit_dir)
 if (os.path.exists('commands_'+obsName+'.py')):
     os.system('rm commands_'+obsName+'.py')
